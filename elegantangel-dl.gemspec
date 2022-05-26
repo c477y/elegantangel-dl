@@ -34,7 +34,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "nokogiri", "~> 1.13"
 
   # Selenium related gems and drivers
-  spec.add_dependency "selenium-devtools", "~> 0.101.0"
+  # spec.add_dependency "selenium-devtools", "~> 0.101.0"
+  spec.add_dependency "selenium-devtools", "~> 0.102.0"
   spec.add_dependency "selenium-webdriver", "~> 4.1"
   spec.add_dependency "webdrivers", "~> 5.0"
 

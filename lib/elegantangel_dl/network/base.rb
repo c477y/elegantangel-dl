@@ -7,10 +7,11 @@ module ElegantAngelDL
 
       BASE_URL = "https://www.elegantangel.com"
 
-      attr_reader :driver, :wait
+      attr_reader :driver, :wait, :store
 
-      def initialize(cookie_string)
+      def initialize(cookie_string, store)
         add_cookie(cookie_string)
+        @store = store
       end
 
       # @param [HTTParty::Response] resp
@@ -28,7 +29,7 @@ module ElegantAngelDL
       end
 
       def close_browser
-        @driver.quit
+        @driver&.quit
       end
 
       private

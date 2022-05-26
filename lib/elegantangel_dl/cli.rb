@@ -22,11 +22,13 @@ module ElegantAngelDL
     > $ elegantangel_dl download --cookie="./cookie.txt" --performers="./performers.yml"
     LONGDESC
     option :help, alias: :h, type: :boolean, default: false
-    option :cookie, required: true, desc: "Path to the file where the cookie is stored", aliases: :c
+    option :cookie, required: false, desc: "Path to the file where the cookie is stored", aliases: :c
     option :performers, required: false, desc: "Path to a YAML file with list of pages of performers", aliases: :p
     option :movies, required: false, desc: "Path to a YAML file with list of pages of movies", aliases: :m
     option :scenes, required: false, desc: "Path to a YAML file with list of pages of individual scenes", aliases: :s
     option :download_path, required: false, desc: "Directory where the files should be downloaded", aliases: :d
+    option :parallel, required: false, type: :numeric, desc: "Number of parallel downloads to perform"
+    option :store, required: false, desc: "Path to the .store file which tracks which files have been downloaded"
     option :verbose, type: :boolean, default: false, desc: "Flag to print verbose logs"
     def download
       client = Client.new(
@@ -35,7 +37,8 @@ module ElegantAngelDL
         performer_file: options[:performers],
         movie_file: options[:movies],
         scene_file: options[:scenes],
-        download_dir: options[:download_path]
+        download_dir: options[:download_path],
+        parallel: options[:parallel]
       )
       client.start
     rescue Interrupt

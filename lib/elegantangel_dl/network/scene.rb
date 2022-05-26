@@ -3,19 +3,27 @@
 module ElegantAngelDL
   module Network
     class Scene < Base
-      attr_reader :scene_url
+      attr_reader :scene_url, :scene_title, :movie_title, :m3u8_master_index
 
       RESOLUTION_REGEX = /.*RESOLUTION=(?<resolution>\d*x\d*).*/x.freeze
 
       # @param [String] scene_url Link to a scene
-      # @return [String] Master M3U8 index file
+      # @return [Data::SceneData] Struct with details of the scene
       def fetch(scene_url)
-        setup_browser
         @scene_url = scene_url
-        m3u8_link = fetch_m3u8_link
-        return if m3u8_link.nil?
+        setup_browser
+        return if store.already_downloaded?(scene_url)
 
-        fetch_master_index(m3u8_link)
+        m3u8_link = fetch_m3u8_link
+        if m3u8_link.nil?
+          ElegantAngelDL.logger.error "[ERR_NO_URL] #{scene_url}"
+          return
+        end
+
+        @m3u8_master_index = fetch_master_index(m3u8_link)
+        Data::SceneData.new(scene_url: @scene_url, scene_title: @scene_title,
+                            movie_title: @movie_title, m3u8_master_index: @m3u8_master_index,
+                            is_downloaded: false)
       ensure
         close_browser
       end
@@ -24,7 +32,7 @@ module ElegantAngelDL
 
       # @param [String] m3u8_link
       # @param [String (frozen)] resolution
-      def fetch_master_index(m3u8_link, resolution = "1280x720")
+      def fetch_master_index(m3u8_link, resolution = "1920x1080")
         resp = handle_api_resp(m3u8_link, HTTParty.get(m3u8_link))
         meta_tags = resp.split("\n")
 
@@ -56,6 +64,12 @@ module ElegantAngelDL
         end
         add_cookie_to_session
         driver.get(scene_url)
+
+        # Fetch the scene and movie title from the page
+        video_title = driver.find_element(class: "video-title")
+        fetch_scene_title(video_title)
+        fetch_movie_title(video_title)
+
         driver.find_element(xpath: '//*[@id="loadPlayer"]').click
         if player_url.nil?
           ElegantAngelDL.logger.error "Unable to find player link from player action"
@@ -66,6 +80,16 @@ module ElegantAngelDL
         driver.navigate.to(player_url)
         wait.until { document_initialised(driver) }
         m3u8_link
+      rescue Selenium::WebDriver::Error::NoSuchWindowError
+        raise FatalError, "[WEB_DRIVER_EXIT] Browser closed or exited unexpectedly."
+      end
+
+      def fetch_scene_title(video_title)
+        @scene_title = video_title.find_element(class: "description").text&.strip
+      end
+
+      def fetch_movie_title(video_title)
+        @movie_title = video_title.find_element(class: "movie-title").text&.strip
       end
     end
   end

@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 require "colorize"
+require "forwardable"
 require "httparty"
 require "nokogiri"
-require "pry"
+require "open3"
+require "parallel"
 require "selenium-webdriver"
+require "set"
 require "webdrivers/chromedriver"
 require "yaml"
+
+require "pry" # TODO: Remove me
 
 module ElegantAngelDL
   class APIError < StandardError
@@ -37,8 +42,14 @@ module ElegantAngelDL
     end
   end
 
+  class FatalError < StandardError; end
+
   def self.logger(**opts)
     @logger ||= ElegantAngelDL::Log.new(**opts).logger
+  end
+
+  def self.youtube_dl_logger
+    @youtube_dl_logger ||= Logger.new("youtube_dl.log", "daily")
   end
 end
 
@@ -48,7 +59,12 @@ require_relative "elegantangel_dl/client"
 require_relative "elegantangel_dl/version"
 require_relative "elegantangel_dl/log"
 
+require_relative "elegantangel_dl/data/download_status_database"
+require_relative "elegantangel_dl/data/scene_data"
+
+require_relative "elegantangel_dl/download/downloader"
 require_relative "elegantangel_dl/download/youtube_dl"
+
 require_relative "elegantangel_dl/network/base"
 require_relative "elegantangel_dl/network/movie"
 require_relative "elegantangel_dl/network/performer"

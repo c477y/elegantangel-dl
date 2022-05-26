@@ -9,6 +9,7 @@ module ElegantAngelDL
         doc = fetch_page
         doc.css("#scenes")
            .css(".grid-item")
+           .css(".grid-item-title")
            .css("a")
            .map { |link| link["href"] }
            .map { |link| File.join(BASE_URL, link) }
