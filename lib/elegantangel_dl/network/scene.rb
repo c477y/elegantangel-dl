@@ -9,7 +9,7 @@ module ElegantAngelDL
 
       # @param [String] scene_url Link to a scene
       # @return [Data::SceneData] Struct with details of the scene
-      def fetch(scene_url)
+      def fetch(scene_url, retry_count = 1)
         @scene_url = scene_url
         setup_browser
         return if store.already_downloaded?(scene_url)
@@ -24,6 +24,14 @@ module ElegantAngelDL
         Data::SceneData.new(scene_url: @scene_url, scene_title: @scene_title,
                             movie_title: @movie_title, m3u8_master_index: @m3u8_master_index,
                             is_downloaded: false)
+      rescue Net::ReadTimeout => e
+        raise FatalError, e.message unless retry_count < 3
+
+        ElegantAngelDL.logger.error "[Net::ReadTimeout] #{e.message}"
+        new_retry_count = retry_count + 1
+        ElegantAngelDL.logger.error "Sleeping for 5 minutes to allow network refresh..."
+        sleep(5 * 60 * 60)
+        fetch(scene_url, new_retry_count)
       ensure
         close_browser
       end

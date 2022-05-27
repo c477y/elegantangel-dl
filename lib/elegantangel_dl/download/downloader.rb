@@ -66,16 +66,11 @@ module ElegantAngelDL
       end
 
       def command
-        [client, output_file_arg, merge_parts_arg, "\"#{uri}\""].join(" ")
+        @client.command(path, uri)
       end
 
-      def output_file_arg
-        path = File.join(download_dir, file_name.to_s)
-        "-o '#{path}.%(ext)s'"
-      end
-
-      def merge_parts_arg
-        "--merge-output-format mkv"
+      def path
+        File.join(download_dir, file_name.to_s)
       end
 
       def file_exists?

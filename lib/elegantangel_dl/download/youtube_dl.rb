@@ -2,12 +2,18 @@
 
 module ElegantAngelDL
   module Download
-    class YoutubeDL
-      def youtube_dl_path
-        @youtube_dl_path ||= begin
+    class YoutubeDL < Base
+      def downloader_path
+        @downloader_path ||= begin
           system("youtube-dl --version", exception: true)
           `which youtube-dl`.chomp
         end
+      end
+
+      def command(path, uri)
+        cmd = [downloader_path, output_file_arg(path), merge_parts_arg, "\"#{uri}\""].join(" ")
+        ElegantAngelDL.logger.debug cmd
+        cmd
       end
     end
   end

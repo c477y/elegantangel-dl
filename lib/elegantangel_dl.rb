@@ -63,6 +63,8 @@ require_relative "elegantangel_dl/data/download_status_database"
 require_relative "elegantangel_dl/data/scene_data"
 
 require_relative "elegantangel_dl/download/downloader"
+require_relative "elegantangel_dl/download/base"
+require_relative "elegantangel_dl/download/yt_dlp"
 require_relative "elegantangel_dl/download/youtube_dl"
 
 require_relative "elegantangel_dl/network/base"

@@ -29,6 +29,7 @@ module ElegantAngelDL
     option :download_path, required: false, desc: "Directory where the files should be downloaded", aliases: :d
     option :parallel, required: false, type: :numeric, desc: "Number of parallel downloads to perform"
     option :store, required: false, desc: "Path to the .store file which tracks which files have been downloaded"
+    option :downloader, required: false, desc: "Name of the client to use to download. Can be either 'youtube-dl'(default) or 'yt-dlp'"
     option :verbose, type: :boolean, default: false, desc: "Flag to print verbose logs"
     def download
       client = Client.new(
@@ -38,7 +39,8 @@ module ElegantAngelDL
         movie_file: options[:movies],
         scene_file: options[:scenes],
         download_dir: options[:download_path],
-        parallel: options[:parallel]
+        parallel: options[:parallel],
+        downloader: options[:downloader]
       )
       client.start
     rescue Interrupt

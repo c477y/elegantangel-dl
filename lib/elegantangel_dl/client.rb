@@ -2,10 +2,11 @@
 
 module ElegantAngelDL
   class Client
-    attr_reader :cookie_file, :performer_file, :movie_file, :scene_file, :download_dir, :parallel, :store
+    attr_reader :cookie_file, :performer_file, :movie_file, :scene_file, :download_dir, :parallel, :store, :downloader
 
     def initialize(cookie_file:, verbose:, performer_file: nil, movie_file: nil, scene_file: nil,
-                   download_dir: nil, parallel: nil, store: nil)
+                   download_dir: nil, parallel: nil, store: nil, downloader: nil)
+      ElegantAngelDL.logger(verbose: verbose)
       @cookie_file = set(cookie_file, "cookie.txt")
       @performer_file = set(performer_file, "performers.yml")
       @movie_file = set(movie_file, "movies.yml")
@@ -13,8 +14,13 @@ module ElegantAngelDL
       @download_dir = set(download_dir, ".")
       @parallel = set(parallel&.to_i, 4)
       @store = set(store, "download_status.store")
+      @downloader = set(downloader, "youtube-dl")
+      init_vars
+    end
+
+    def init_vars
+      download_client
       download_status_store
-      ElegantAngelDL.logger(verbose: verbose)
     end
 
     def start
@@ -99,13 +105,17 @@ module ElegantAngelDL
       scene_pages.each_slice(parallel) do |batch|
         urls = batch.map { |x| scene_processor.fetch(x) }.compact
         Parallel.map(urls, in_threads: parallel) do |url|
-          Download::Downloader.new(youtube_dl_client, download_status_store, download_dir).download(url)
+          Download::Downloader.new(download_client, download_status_store, download_dir).download(url)
         end
       end
     end
 
-    def youtube_dl_client
-      @youtube_dl_client ||= Download::YoutubeDL.new.youtube_dl_path
+    def download_client
+      @download_client ||= case downloader
+                           when "youtube-dl" then @download_client ||= Download::YoutubeDL.new
+                           when "yt-dlp" then @download_client ||= Download::YtDLP.new
+                           else raise FatalError, "Invalid downloader. Use 'youtube_dl'(default) or 'yt-dlp'"
+                           end
     end
 
     # @return [ElegantAngelDL::Network::Scene]
