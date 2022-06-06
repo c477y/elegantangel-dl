@@ -23,7 +23,7 @@ module ElegantAngelDL
             return false unless scene_data
 
             if scene_data.is_downloaded == true
-              ElegantAngelDL.logger.info "[ERR_FILE_DOWNLOADED] #{scene_data.file_name}"
+              ElegantAngelDL.logger.info "[ER_FILE_DOWNLOADED] #{scene_data.file_name}"
               return true
             end
           end
@@ -32,7 +32,7 @@ module ElegantAngelDL
 
       def save_download(scene_data, is_downloaded: false)
         semaphore.synchronize do
-          ElegantAngelDL.logger.info "[ADD_TO_DATABASE] #{scene_data.file_name}"
+          ElegantAngelDL.logger.debug "[DATABASE_ADD] #{scene_data.file_name}"
           store.transaction do
             scene_data[:is_downloaded] = is_downloaded
             store[scene_data.key] = scene_data
@@ -50,7 +50,7 @@ module ElegantAngelDL
 
             scene_data_urls.add(scene_data.scene_url)
             if scene_data.scene_url == scene_url
-              ElegantAngelDL.logger.info "[ERR_FILE_DOWNLOADED] #{scene_data.file_name}"
+              ElegantAngelDL.logger.info "[ER_FILE_DOWNLOADED] #{scene_data.file_name}"
               return true
             end
           end

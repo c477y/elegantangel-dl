@@ -4,12 +4,7 @@ module ElegantAngelDL
   module Download
     class YtDLP < Base
       def downloader_path
-        @downloader_path ||= begin
-          stdout, stderr, status = Open3.capture3("which yt-dlp")
-          raise FatalError, stderr unless status.success?
-
-          stdout.strip
-        end
+        @downloader_path ||= super("yt-dlp")
       end
 
       def command(path, uri)

@@ -2,11 +2,12 @@
 
 module ElegantAngelDL
   class Client
-    attr_reader :cookie_file, :performer_file, :movie_file, :scene_file, :download_dir, :parallel, :store, :downloader
+    attr_reader :cookie_file, :performer_file, :movie_file, :scene_file, :download_dir, :parallel, :store, :downloader, :verbose
 
     def initialize(cookie_file:, verbose:, performer_file: nil, movie_file: nil, scene_file: nil,
                    download_dir: nil, parallel: nil, store: nil, downloader: nil)
       ElegantAngelDL.logger(verbose: verbose)
+      @verbose = verbose
       @cookie_file = set(cookie_file, "cookie.txt")
       @performer_file = set(performer_file, "performers.yml")
       @movie_file = set(movie_file, "movies.yml")
@@ -120,17 +121,17 @@ module ElegantAngelDL
 
     # @return [ElegantAngelDL::Network::Scene]
     def scene_processor
-      @scene_processor ||= Network::Scene.new(cookie, download_status_store)
+      @scene_processor ||= Network::Scene.new(cookie, download_status_store, verbose: verbose)
     end
 
     # @return [ElegantAngelDL::Network::Performer]
     def performer_processor
-      @performer_processor ||= Network::Performer.new(cookie, download_status_store)
+      @performer_processor ||= Network::Performer.new(cookie, download_status_store, verbose: verbose)
     end
 
     # @return [ElegantAngelDL::Network::Movie]
     def movie_processor
-      @movie_processor ||= Network::Movie.new(cookie, download_status_store)
+      @movie_processor ||= Network::Movie.new(cookie, download_status_store, verbose: verbose)
     end
 
     def download_status_store

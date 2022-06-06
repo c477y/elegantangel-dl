@@ -4,7 +4,7 @@ module ElegantAngelDL
   module Data
     SceneData = Struct.new(:scene_url, :scene_title, :movie_title, :m3u8_master_index, :is_downloaded, keyword_init: true) do
       def key
-        scene_title.gsub(/[\s\W_]/, "").downcase
+        "#{movie_title}#{scene_title}".gsub(/[\s\W_]/, "").downcase
       end
 
       def file_name

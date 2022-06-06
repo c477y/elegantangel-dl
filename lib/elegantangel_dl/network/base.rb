@@ -7,11 +7,12 @@ module ElegantAngelDL
 
       BASE_URL = "https://www.elegantangel.com"
 
-      attr_reader :driver, :wait, :store
+      attr_reader :driver, :wait, :store, :browser_opts
 
-      def initialize(cookie_string, store)
+      def initialize(cookie_string, store, **browser_opts)
         add_cookie(cookie_string)
         @store = store
+        @browser_opts = browser_opts
       end
 
       # @param [HTTParty::Response] resp
@@ -24,8 +25,16 @@ module ElegantAngelDL
       end
 
       def setup_browser
-        @driver = Selenium::WebDriver.for :chrome
-        @wait = Selenium::WebDriver::Wait.new(timeout: 10)
+        @driver = if browser_opts[:verbose]
+                    Selenium::WebDriver.for :chrome
+                  else
+                    caps = Selenium::WebDriver::Remote::Capabilities.chrome(
+                      "goog:chromeOptions" => { "args" => ["--headless"] }
+                    )
+                    Selenium::WebDriver.for(:chrome, capabilities: caps)
+                  end
+
+        @wait = Selenium::WebDriver::Wait.new(timeout: 20)
       end
 
       def close_browser

@@ -4,10 +4,7 @@ module ElegantAngelDL
   module Download
     class YoutubeDL < Base
       def downloader_path
-        @downloader_path ||= begin
-          system("youtube-dl --version", exception: true)
-          `which youtube-dl`.chomp
-        end
+        @downloader_path ||= super("youtube-dl")
       end
 
       def command(path, uri)

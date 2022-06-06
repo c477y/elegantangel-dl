@@ -26,7 +26,6 @@ module ElegantAngelDL
         raise ArgumentError, "#{m3u8_master_index} is not a valid m3u8 index link." unless valid_link?
 
         if file_exists?
-          ElegantAngelDL.logger.info "[ERR_FILE_EXISTS] #{file_name}"
           store.save_download(scene_data, is_downloaded: true) unless store.file_downloaded?(scene_data.key)
         elsif store.file_downloaded?(scene_data.key)
           nil
@@ -41,12 +40,12 @@ module ElegantAngelDL
         Open3.popen2e(command) do |_, stdout_and_stderr, wait_thr|
           output = []
           pid = wait_thr.pid
-          ElegantAngelDL.logger.info "[PID] #{pid}. FILE #{file_name}"
+          ElegantAngelDL.logger.info "[PID] #{pid} [FILE] #{file_name}"
           stdout_and_stderr.each do |line|
             output << line
             ElegantAngelDL.youtube_dl_logger.info("#{pid} -- #{line}")
-            next unless SEGMENT_DOWNLOAD_LOG.match?(line)
           end
+
           exit_status = wait_thr.value
           if exit_status != 0
             store.save_download(@scene_data, is_downloaded: false)

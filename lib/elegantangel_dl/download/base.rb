@@ -3,8 +3,11 @@
 module ElegantAngelDL
   module Download
     class Base
-      def downloader_path
-        raise "Not Implemented"
+      def downloader_path(downloader)
+        stdout, stderr, status = Open3.capture3("which #{downloader}")
+        raise FatalError, stderr unless status.success?
+
+        stdout.strip
       end
 
       def command(_path, _uri)
