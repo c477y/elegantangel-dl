@@ -56,7 +56,7 @@ module ElegantAngelDL
       return unless valid_file?(performer_file)
 
       ElegantAngelDL.logger.info "[START_PERFORMER] #{performer_file}"
-      pages = load_yaml(performer_file)
+      pages = load_yaml!(performer_file)
       download_performer_file(pages)
       ElegantAngelDL.logger.info "[COMPLETE_PERFORMER] #{performer_file}"
     end
@@ -65,7 +65,7 @@ module ElegantAngelDL
       return unless valid_file?(movie_file)
 
       ElegantAngelDL.logger.info "[START_MOVIE] #{movie_file}"
-      pages = load_yaml(movie_file)
+      pages = load_yaml!(movie_file)
       download_movie_file(pages)
       ElegantAngelDL.logger.info "[COMPLETE_MOVIE] #{movie_file}"
     end
@@ -74,7 +74,7 @@ module ElegantAngelDL
       return unless valid_file?(scene_file)
 
       ElegantAngelDL.logger.info "[START_SCENE] #{scene_file}"
-      pages = load_yaml(scene_file)
+      pages = load_yaml!(scene_file)
       download_scenes(pages)
       ElegantAngelDL.logger.info "[COMPLETE_SCENE] #{scene_file}"
     end
@@ -143,8 +143,15 @@ module ElegantAngelDL
     end
 
     # @param [File] file
-    def load_yaml(file)
-      YAML.load_file(file)["urls"] || []
+    def load_yaml!(file)
+      yaml = YAML.load_file(file)
+      raise FatalError, "#{file}: Invalid YAML format" unless yaml
+      raise FatalError, "#{file}: Missing 'urls' key" unless yaml.key?("urls")
+      unless yaml["urls"].is_a?(Array) || yaml["urls"].nil?
+        raise FatalError, "#{file}: Invalid 'urls' format. Was expecting Array, but received #{yaml["urls"].class}"
+      end
+
+      yaml["urls"] || []
     end
 
     def semaphore

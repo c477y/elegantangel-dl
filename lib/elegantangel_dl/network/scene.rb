@@ -45,7 +45,7 @@ module ElegantAngelDL
         meta_tags = resp.split("\n")
 
         ElegantAngelDL.logger.debug "M3U8 Index File contents:"
-        meta_tags.each { |x| ElegantAngelDL.logger.debug x }
+        meta_tags.each { |x| ElegantAngelDL.logger.debug "\t#{x}" }
 
         # Find the URL with the matching resolution
         meta_tags[1..-2].each_with_index do |meta, index|
@@ -67,7 +67,7 @@ module ElegantAngelDL
         driver.intercept do |request, &continue|
           uri = URI.parse(request.url)
           player_url = request.url if uri.host == "www.adultempire.com" && uri.path.include?("/gw/player")
-          m3u8_link = request.url if uri.host == "internal-video.adultempire.com" && uri.path.end_with?("/master.m3u8")
+          m3u8_link = request.url if uri.path.end_with?("/master.m3u8")
           continue.call(request)
         end
         add_cookie_to_session
@@ -87,9 +87,14 @@ module ElegantAngelDL
         driver.manage.delete_all_cookies
         driver.navigate.to(player_url)
         wait.until { document_initialised(driver) }
+        sleep(5) if m3u8_link.nil?
         m3u8_link
       rescue Selenium::WebDriver::Error::NoSuchWindowError
         raise FatalError, "[WEB_DRIVER_EXIT] Browser closed or exited unexpectedly."
+      rescue Selenium::WebDriver::Error::TimeoutError => e
+        ElegantAngelDL.logger.error "Page failed to load the video player"
+        ElegantAngelDL.logger.debug e.message
+        nil
       end
 
       def fetch_scene_title(video_title)
