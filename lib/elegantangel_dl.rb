@@ -49,7 +49,7 @@ module ElegantAngelDL
   end
 
   def self.youtube_dl_logger
-    @youtube_dl_logger ||= Logger.new("youtube_dl.log", "daily")
+    @youtube_dl_logger ||= Logger.new("downloader.log", "daily")
   end
 end
 
